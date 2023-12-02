@@ -5,9 +5,9 @@ import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { useDebouncedCallback } from 'use-debounce';
 
 export default function Search({ placeholder }: { placeholder: string }) {
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const { replace } = useRouter();
+  const searchParams = useSearchParams(); // access an object of the current URL params
+  const pathname = usePathname(); // current URL's pathname
+  const { replace } = useRouter(); // enables navigation between routes within client components
 
   const handleSearch = useDebouncedCallback((term) => {
     console.log(`Searching... ${term}`);
