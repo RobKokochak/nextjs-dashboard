@@ -1,5 +1,3 @@
-## Next.js App Router Course - Starter
+## Conference Paper Review System
 
-This is the starter template for the Next.js App Router Course. It contains the starting code for the dashboard application.
-
-For more information, see the [course curriculum](https://nextjs.org/learn) on the Next.js Website.
+This hypothetical system facilitates users submitting papers to conferences for review.
