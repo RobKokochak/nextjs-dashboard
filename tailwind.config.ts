@@ -17,6 +17,8 @@ const config: Config = {
           500: '#0070F3',
           600: '#2F6FEB',
         },
+        'dark-color': '#1B2028',
+        'highlight-blue': 'rgb(17, 92, 255)',
       },
     },
     keyframes: {
