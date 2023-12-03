@@ -8,10 +8,10 @@ import {
 import { fetchCardData } from '@/app/lib/data';
 
 const iconMap = {
-  collected: BanknotesIcon,
-  customers: UserGroupIcon,
-  pending: ClockIcon,
-  invoices: InboxIcon,
+  role: BanknotesIcon,
+  conferences: UserGroupIcon,
+  assigned: ClockIcon,
+  papers: InboxIcon,
 };
 
 export default async function CardWrapper() {
@@ -26,14 +26,10 @@ export default async function CardWrapper() {
     <>
       {/* NOTE: comment in this code when you get to this point in the course */}
 
-      <Card title="Collected" value={totalPaidInvoices} type="collected" />
-      <Card title="Pending" value={totalPendingInvoices} type="pending" />
-      <Card title="Total Invoices" value={numberOfInvoices} type="invoices" />
-      <Card
-        title="Total Customers"
-        value={numberOfCustomers}
-        type="customers"
-      />
+      <Card title="User Role" value={totalPaidInvoices} type="role" />
+      <Card title="Submitted Papers" value={numberOfInvoices} type="papers" />
+      <Card title="Assigned Papers" value={totalPendingInvoices} type="assigned" />
+      <Card title="Upcoming Conferences" value={numberOfCustomers} type="conferences" />
     </>
   );
 }
@@ -45,15 +41,15 @@ export function Card({
 }: {
   title: string;
   value: number | string;
-  type: 'invoices' | 'customers' | 'pending' | 'collected';
+  type: 'papers' | 'conferences' | 'assigned' | 'role';
 }) {
   const Icon = iconMap[type];
 
   return (
     <div className="rounded-xl bg-dark-color p-2 shadow-sm">
-      <div className="flex p-4">
+      <div className="flex p-3">
         {Icon ? <Icon className="h-5 w-5 text-sky-100" /> : null}
-        <h3 className="ml-2 text-sm font-medium">{title}</h3>
+        <h3 className="ml-2 text-xs font-medium">{title}</h3>
       </div>
       <p
         className={`truncate rounded-xl bg-slate-800 px-4 py-8 text-center text-2xl`}
