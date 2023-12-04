@@ -1,5 +1,5 @@
 import {
-  BanknotesIcon,
+  UserIcon,
   ClockIcon,
   UserGroupIcon,
   InboxIcon,
@@ -8,28 +8,24 @@ import {
 import { fetchCardData } from '@/app/lib/data';
 
 const iconMap = {
-  role: BanknotesIcon,
+  role: UserIcon,
   conferences: UserGroupIcon,
   assigned: ClockIcon,
   papers: InboxIcon,
 };
 
 export default async function CardWrapper() {
-  const {
-    numberOfInvoices,
-    numberOfCustomers,
-    totalPaidInvoices,
-    totalPendingInvoices,
+  let {
+    userRole,
+    numberOfConferences,
   } = await fetchCardData();
 
   return (
     <>
-      {/* NOTE: comment in this code when you get to this point in the course */}
-
-      <Card title="User Role" value={totalPaidInvoices} type="role" />
-      <Card title="Submitted Papers" value={numberOfInvoices} type="papers" />
-      <Card title="Assigned Papers" value={totalPendingInvoices} type="assigned" />
-      <Card title="Upcoming Conferences" value={numberOfCustomers} type="conferences" />
+      <Card title="Role" value={userRole} type="role" />
+      <Card title="Submitted Papers" value='0' type="papers" />
+      <Card title="Assigned Papers" value='0' type="assigned" />
+      <Card title="Upcoming Conferences" value={numberOfConferences} type="conferences" />
     </>
   );
 }

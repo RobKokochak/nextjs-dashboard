@@ -7,9 +7,11 @@ import {
   LatestInvoiceRaw,
   User,
   Revenue,
+  Conference,
 } from './definitions';
 import { formatCurrency } from './utils';
 import { unstable_noStore as noStore } from 'next/cache';
+import { late } from 'zod';
 
 export async function fetchRevenue() {
   // Add noStore() here prevent the response from being cached - makes rendering dynamic
@@ -27,53 +29,91 @@ export async function fetchRevenue() {
 export async function fetchUpcomingConferences() {
   noStore();
   try {
-    const data = await sql<LatestInvoiceRaw>`
-      SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
-      FROM invoices
-      JOIN customers ON invoices.customer_id = customers.id
-      ORDER BY invoices.date DESC
-      LIMIT 5`;
+    const conferences = await sql`SELECT * FROM conference`;
 
-    const latestInvoices = data.rows.map((invoice) => ({
-      ...invoice,
-      amount: formatCurrency(invoice.amount),
+    const latestConferences = conferences.rows.map((conference) => ({
+      ...conference,
     }));
-    return latestInvoices;
+    return latestConferences;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch the latest invoices.');
+    throw new Error('Failed to fetch the latest conferences.');
+  }
+}
+
+export async function fetchSubmittedPapers() {
+  noStore();
+  const user = await getUser('hector@simpson.com');
+  try {
+    const submittedPapers = await sql`SELECT paper.*
+      FROM paper
+      JOIN paper_author_link ON paper.paper_id = paper_author_link.paper_id
+      JOIN uuser ON paper_author_link.author_user_id = uuser.user_id
+      WHERE uuser.user_id = ${user.user_id};
+    `;
+
+    
+
+    const latestPapers = submittedPapers.rows.map((paper) => ({
+      ...paper,
+    }));
+    for (let i = 0; i < latestPapers.length; i++) {
+      latestPapers[i].conference_id = (await getConference(latestPapers[i].conference_id)).name;
+    }
+
+    return latestPapers;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch submitted papers.');
   }
 }
 
 export async function fetchCardData() {
   noStore();
+  const user = await getUser('hector@simpson.com');
   try {
-    // You can probably combine these into a single SQL query
-    // However, we are intentionally splitting them to demonstrate
-    // how to initialize multiple queries in parallel with JS.
     const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
     const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
     const invoiceStatusPromise = sql`SELECT
-         SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS "paid",
-         SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
-         FROM invoices`;
+        SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS "paid",
+        SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
+        FROM invoices`;
+    const userRoleLinkPromise = sql`SELECT 
+        * FROM user_role_link
+        WHERE User_id = ${user.user_id}`;
+    const conferenceCountPromise = sql`SELECT COUNT(*) FROM conference`;
 
     const data = await Promise.all([
       invoiceCountPromise,
       customerCountPromise,
       invoiceStatusPromise,
+      userRoleLinkPromise,
+      conferenceCountPromise,
     ]);
 
     const numberOfInvoices = Number(data[0].rows[0].count ?? '0');
     const numberOfCustomers = Number(data[1].rows[0].count ?? '0');
     const totalPaidInvoices = formatCurrency(data[2].rows[0].paid ?? '0');
     const totalPendingInvoices = formatCurrency(data[2].rows[0].pending ?? '0');
+    let userRole = '';
+    for (let i = 0; i < data[3].rows.length; i++) {
+      let role = ''
+      if (data[3].rows[i].role_id == '1') role = 'Author';
+      else if (data[3].rows[i].role_id == '2') role = 'Reviewer';
+      else role = 'Conference Chair';
+      userRole += role + ', ';
+    }
+    // Remove the trailing comma and space
+    userRole = userRole.slice(0, -2);
+    const numberOfConferences = Number(data[4].rows[0].count ?? '0');
 
     return {
       numberOfCustomers,
       numberOfInvoices,
       totalPaidInvoices,
       totalPendingInvoices,
+      userRole,
+      numberOfConferences,
     };
   } catch (error) {
     console.error('Database Error:', error);
@@ -220,10 +260,20 @@ export async function fetchFilteredCustomers(query: string) {
 
 export async function getUser(email: string) {
   try {
-    const user = await sql`SELECT * FROM users WHERE email=${email}`;
+    const user = await sql`SELECT * FROM uuser WHERE email=${email}`;
     return user.rows[0] as User;
   } catch (error) {
     console.error('Failed to fetch user:', error);
     throw new Error('Failed to fetch user.');
+  }
+}
+
+export async function getConference(conf_id: string) {
+  try {
+    const conference = await sql`SELECT * FROM conference WHERE conference_id=${conf_id}`;
+    return conference.rows[0] as Conference;
+  } catch (error) {
+    console.error('Failed to fetch conference:', error);
+    throw new Error('Failed to fetch conference.');
   }
 }

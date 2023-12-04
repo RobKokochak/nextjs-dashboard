@@ -1,6 +1,6 @@
 import CardWrapper from '@/app/ui/dashboard/cards';
-import UpcomingConferences from '@/app/ui/dashboard/latest-invoices';
-import {SubmittedPapers, AssignedPapers } from '@/app/ui/dashboard/revenue-chart';
+import UpcomingConferences from '@/app/ui/dashboard/latest-conferences';
+import {SubmittedPapers, AssignedPapers } from '@/app/ui/dashboard/submitted-papers';
 import { Suspense } from 'react';
 import { 
   SubmittedPapersSkeleton,
