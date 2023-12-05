@@ -82,6 +82,7 @@ export async function fetchCardData() {
         * FROM user_role_link
         WHERE User_id = ${user.user_id}`;
     const conferenceCountPromise = sql`SELECT COUNT(*) FROM conference`;
+    const paperCountPromise = sql`SELECT COUNT(*) FROM paper_author_link WHERE author_user_id = ${user.user_id}`;
 
     const data = await Promise.all([
       invoiceCountPromise,
@@ -89,6 +90,7 @@ export async function fetchCardData() {
       invoiceStatusPromise,
       userRoleLinkPromise,
       conferenceCountPromise,
+      paperCountPromise,
     ]);
 
     const numberOfInvoices = Number(data[0].rows[0].count ?? '0');
@@ -106,6 +108,7 @@ export async function fetchCardData() {
     // Remove the trailing comma and space
     userRole = userRole.slice(0, -2);
     const numberOfConferences = Number(data[4].rows[0].count ?? '0');
+    const numberOfPapers = Number(data[5].rows[0].count ?? '0');
 
     return {
       numberOfCustomers,
@@ -114,6 +117,7 @@ export async function fetchCardData() {
       totalPendingInvoices,
       userRole,
       numberOfConferences,
+      numberOfPapers
     };
   } catch (error) {
     console.error('Database Error:', error);
@@ -158,6 +162,28 @@ export async function fetchFilteredInvoices(
   }
 }
 
+export async function fetchFilteredConferences(
+  query: string,
+  currentPage: number,
+) {
+  noStore();
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  try {
+    const conferences = await sql<Conference>`
+      SELECT *
+      FROM conference
+      WHERE conference.name ILIKE ${`%${query}%`} 
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
+    `;
+
+    return conferences.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch filtered conferences.');
+  }
+}
+
 export async function fetchInvoicesPages(query: string) {
   noStore();
   try {
@@ -177,6 +203,26 @@ export async function fetchInvoicesPages(query: string) {
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch total number of invoices.');
+  }
+}
+
+export async function fetchConferencesPages(query: string) {
+  noStore();
+  try {
+    const count = await sql`SELECT *
+    FROM conference
+    JOIN uuser ON conference.conference_chair_user_id = user.user_id
+    WHERE
+      uuser.fname ILIKE ${`%${query}%`} OR
+      uuser.lname ILIKE ${`%${query}%`} OR
+      conference.name ILIKE ${`%${query}%`};
+  `;
+
+    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
+    return totalPages;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch total number of conferences.');
   }
 }
 
@@ -275,5 +321,26 @@ export async function getConference(conf_id: string) {
   } catch (error) {
     console.error('Failed to fetch conference:', error);
     throw new Error('Failed to fetch conference.');
+  }
+}
+
+export async function getConferenceIdByName(name: string) {
+  try {
+    console.log(name);
+    const conference = await sql`SELECT * FROM conference WHERE name=${name}`;
+    return conference.rows[0].conference_id;
+  } catch (error) {
+    console.error('Failed to fetch conference id:', error);
+    throw new Error('Failed to fetch conference id.');
+  }
+}
+
+export async function getConferences() {
+  try {
+    const conferences = await sql`SELECT * FROM conference`;
+    return conferences.rows as Conference[];
+  } catch (error) {
+    console.error('Failed to fetch conference:', error);
+    throw new Error('Failed to fetch conferences.');
   }
 }

@@ -18,12 +18,13 @@ export default async function CardWrapper() {
   let {
     userRole,
     numberOfConferences,
+    numberOfPapers
   } = await fetchCardData();
 
   return (
     <>
       <Card title="Role" value={userRole} type="role" />
-      <Card title="Submitted Papers" value='0' type="papers" />
+      <Card title="Submitted Papers" value={numberOfPapers} type="papers" />
       <Card title="Assigned Papers" value='0' type="assigned" />
       <Card title="Upcoming Conferences" value={numberOfConferences} type="conferences" />
     </>
