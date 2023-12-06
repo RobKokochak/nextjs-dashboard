@@ -1,6 +1,6 @@
-import { Form } from '@/app/ui/invoices/create-form';
-import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
-import { fetchCustomers, fetchUpcomingConferences, getConferences } from '@/app/lib/data';
+import { SubmitPaperForm } from '@/app/ui/conferences/create-form';
+import Breadcrumbs from '@/app/ui/conferences/breadcrumbs';
+import { getConferences } from '@/app/lib/data';
  
 export default async function Page() {
   const conferences = await getConferences();
@@ -17,7 +17,7 @@ export default async function Page() {
           },
         ]}
       />
-      <Form conferences={conferences} />
+      <SubmitPaperForm conferences={conferences} />
     </main>
   );
 }

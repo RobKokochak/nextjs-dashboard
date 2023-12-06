@@ -1,11 +1,10 @@
-import Pagination from '@/app/ui/invoices/pagination';
+import Pagination from '@/app/ui/conferences/pagination';
 import Search from '@/app/ui/search';
-import { ConferencesTable, InvoicesTable } from '@/app/ui/invoices/conferences-table';
-import { CreateInvoice, SubmitPaper } from '@/app/ui/invoices/buttons';
+import { ConferencesTable } from '@/app/ui/conferences/conferences-table';
+import { SubmitPaper } from '@/app/ui/conferences/buttons';
 
 import { ConferencesTableSkeleton } from '@/app/ui/skeletons';
 import { Suspense } from 'react';
-import { fetchConferencesPages, fetchInvoicesPages } from '@/app/lib/data';
  
 export default async function Page({
   searchParams,
@@ -17,8 +16,6 @@ export default async function Page({
 }) {
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
-
-  //const totalPages = await fetchConferencesPages(query);
  
   return (
     <div className="w-full">

@@ -9,7 +9,7 @@ export default function Search({ placeholder }: { placeholder: string }) {
   const pathname = usePathname(); // current URL's pathname
   const { replace } = useRouter(); // enables navigation between routes within client components
 
-  const handleSearch = useDebouncedCallback((term) => {
+  const handleSearch = useDebouncedCallback((term) => { // wait 300 mil. to execute search
     console.log(`Searching... ${term}`);
     const params = new URLSearchParams(searchParams);
     params.set('page', '1');
